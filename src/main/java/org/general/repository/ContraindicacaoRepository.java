@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ContraindicacaoRepository extends JpaRepository<Contraindicacao, Long> {
 
+    Contraindicacao findByContraindicacao(String contraindicacao);
 }

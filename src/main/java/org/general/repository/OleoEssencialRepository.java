@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OleoEssencialRepository extends JpaRepository<OleoEssencial, Long> {
 
+    OleoEssencial findByNome(String nome);
 }

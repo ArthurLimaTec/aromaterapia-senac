@@ -1,34 +1,24 @@
 package org.general;
 
-import org.springframework.boot.SpringApplication;
+import org.general.telas.TelaInicial;
+import org.general.util.SpringContext;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
-import java.util.Arrays;
-import java.util.List;
+import java.awt.*;
 
-@RestController
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
-    }
+        System.setProperty("java.awt.headless", "false");
+        var context = new SpringApplicationBuilder(Main.class)
+                .headless(false)
+                .run(args);
+        SpringContext.setApplicationContext(context);
 
-    // Protótipo de endpoint: cadastra um óleo essencial
-    @PostMapping("/api/prototipo-oleo")
-    public String cadastrarOleoEssencial(@RequestParam String nome) {
-        // Aqui seria uma chamada para o service de verdade, mas para protótipo:
-        return "Óleo essencial cadastrado: " + nome;
+        EventQueue.invokeLater(() -> {
+            context.getBean(TelaInicial.class).setVisible(true);
+        });
     }
-
-    // Protótipo de endpoint: lista todos (simulado)
-    @GetMapping("/api/prototipo-oleos")
-    public List<String> listarOleosEssenciais() {
-        // Simulação de retorno de lista
-        return Arrays.asList("Lavanda", "Alecrim", "Hortelã-pimenta");
-    }
-
 }
+
