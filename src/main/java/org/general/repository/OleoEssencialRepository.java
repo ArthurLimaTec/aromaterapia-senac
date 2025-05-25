@@ -23,16 +23,17 @@ public interface OleoEssencialRepository extends JpaRepository<OleoEssencial, Lo
     LEFT JOIN indicacoes i ON i.id = oei.indicacao_id
     LEFT JOIN oleos_essenciais_contraindicacoes oec ON oec.oleo_essencial_id = oe.id
     LEFT JOIN contraindicacoes c ON c.id = oec.contraindicacao_id
-    WHERE (:oleos IS NULL OR oe.nome IN (:oleos))
-      AND (:indicacoes IS NULL OR i.sintoma IN (:indicacoes))
-      AND (:contraindicacoes IS NULL OR c.contraindicacao IN (:contraindicacoes))
+    WHERE (:oleos IS NULL OR FIND_IN_SET(oe.nome, :oleos))
+      AND (:indicacoes IS NULL OR FIND_IN_SET(i.sintoma, :indicacoes))
+      AND (:contraindicacoes IS NULL OR FIND_IN_SET(c.contraindicacao, :contraindicacoes))
     GROUP BY oe.nome
     """, nativeQuery = true)
     List<Object[]> buscarOleosComIndicacoesEContraindicacoes(
-            @Param("oleos") List<String> oleos,
-            @Param("indicacoes") List<String> indicacoes,
-            @Param("contraindicacoes") List<String> contraindicacoes
+            @Param("oleos") String oleos,
+            @Param("indicacoes") String indicacoes,
+            @Param("contraindicacoes") String contraindicacoes
     );
+
 
 
     @Query(value = """

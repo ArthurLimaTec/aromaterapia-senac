@@ -2,32 +2,37 @@ package org.general.service;
 
 import org.general.model.*;
 import org.general.repository.*;
+import org.general.telas.JanelaEditar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PesquisaService {
 
     @Autowired
     private OleoEssencialRepository oleoEssencialRepository;
+
     @Autowired
     private IndicacaoRepository indicacaoRepository;
+
     @Autowired
     private ContraindicacaoRepository contraindicacaoRepository;
+
     @Autowired
     private OleoEssencialIndicacaoRepository oleoEssencialIndicacaoRepository;
+
     @Autowired
     private OleoEssencialContraindicacaoRepository oleoEssencialContraindicacaoRepository;
 
-    private List<Indicacao> indicacoesList;
-    private List<Contraindicacao> contraindicacoesList;
-
-    public DefaultTableModel buscarTodos(){
+    public DefaultTableModel buscarTodos() {
 
         List<Object[]> resultados = oleoEssencialRepository.buscarTodosOleosComIndicacoesEContraindicacoes();
 
@@ -42,24 +47,27 @@ public class PesquisaService {
         return criarModeloTabela(tableViews);
     }
 
-    public List<TableView> tratarCampos(String oleosTxt, String indicacoesTxt, String contraindicacoesTxt){
+    public List<TableView> tratarCampos(String oleosTxt, String indicacoesTxt, String contraindicacoesTxt) {
 
-        List<String> oleos = oleosTxt == null || oleosTxt.isBlank()
-                ? null
-                : Arrays.stream(oleosTxt.split(";")).map(String::trim).toList();
+        String oleos = oleosTxt == null || oleosTxt.isBlank() ? null : Arrays.stream(oleosTxt.split(";"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(","));
 
-        List<String> indicacoes = indicacoesTxt == null || indicacoesTxt.isBlank()
-                ? null
-                : Arrays.stream(indicacoesTxt.split(";")).map(String::trim).toList();
+        String indicacoes = indicacoesTxt == null || indicacoesTxt.isBlank() ? null : Arrays.stream(indicacoesTxt.split(";"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(","));
 
-        List<String> contraindicacoes = contraindicacoesTxt == null || contraindicacoesTxt.isBlank()
-                ? null
-                : Arrays.stream(contraindicacoesTxt.split(";")).map(String::trim).toList();
+        String contraindicacoes = contraindicacoesTxt == null || contraindicacoesTxt.isBlank() ? null : Arrays.stream(contraindicacoesTxt.split(";"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.joining(","));
 
         return buscarOleos(oleos, indicacoes, contraindicacoes);
     }
 
-    public List<TableView> buscarOleos(List<String> oleos, List<String> indicacoes, List<String> contraindicacoes) {
+    public List<TableView> buscarOleos(String oleos, String indicacoes, String contraindicacoes) {
 
         List<Object[]> resultados = oleoEssencialRepository.buscarOleosComIndicacoesEContraindicacoes(
                 oleos, indicacoes, contraindicacoes
@@ -101,4 +109,96 @@ public class PesquisaService {
         return model;
     }
 
+    public void excluir(String oleoEssencialNome) {
+
+        try {
+
+            OleoEssencial oleoEssencial = oleoEssencialRepository.findByNome(oleoEssencialNome);
+
+            oleoEssencialIndicacaoRepository.excluirVinculo(oleoEssencial.getId());
+            oleoEssencialContraindicacaoRepository.excluirVinculo(oleoEssencial.getId());
+
+            oleoEssencialRepository.delete(oleoEssencial);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void editar(String oleoEssencialNome, List<String> indicacoesList, List<String> contraindicacoesList) {
+
+        OleoEssencial oleoEssencial = oleoEssencialRepository.findByNome(oleoEssencialNome);
+        List<OleoEssencialIndicacao> oleoEssencialIndicacaoDBList = oleoEssencialIndicacaoRepository.findAllByOleoId(oleoEssencial.getId());
+
+        // Monta lista de sintomas das novas indicações
+        Set<String> sintomasNovos = indicacoesList.stream()
+                .map(String::trim)
+                .collect(Collectors.toSet());
+
+        // Vínculos com Indicações para remover (estão no banco, mas não na nova lista)
+        List<OleoEssencialIndicacao> indicacoesParaRemover = oleoEssencialIndicacaoDBList.stream()
+                .filter(oei -> !sintomasNovos.contains(oei.getIndicacaoId().getSintoma()))
+                .toList();
+
+        for (OleoEssencialIndicacao oei : indicacoesParaRemover) {
+            oleoEssencialIndicacaoRepository.delete(oei);
+        }
+
+
+        // Sintomas já existentes no banco
+        Set<String> sintomasDB = oleoEssencialIndicacaoDBList.stream()
+                .map(oei -> oei.getIndicacaoId().getSintoma())
+                .collect(Collectors.toSet());
+
+        // Indicações para adicionar (estão na nova lista, mas não no banco)
+        for (String sintoma : sintomasNovos) {
+            if (!sintomasDB.contains(sintoma)) {
+                Indicacao indicacao = indicacaoRepository.findBySintoma(sintoma);
+                if (indicacao == null) {
+                    indicacao = new Indicacao();
+                    indicacao.setSintoma(sintoma);
+                    indicacao = indicacaoRepository.save(indicacao); // Já retorna o objeto salvo
+                }
+                OleoEssencialIndicacao novoVinculo = new OleoEssencialIndicacao();
+                novoVinculo.setOleoEssencialId(oleoEssencial);
+                novoVinculo.setIndicacaoId(indicacao);
+                oleoEssencialIndicacaoRepository.save(novoVinculo);
+            }
+        }
+
+        List<OleoEssencialContraindicacao> oleoEssencialContraindicacaoDBList =
+                oleoEssencialContraindicacaoRepository.findAllByOleoId(oleoEssencial.getId());
+
+        Set<String> contraNovas = contraindicacoesList.stream()
+                .map(String::trim)
+                .collect(Collectors.toSet());
+
+        List<OleoEssencialContraindicacao> contraParaRemover = oleoEssencialContraindicacaoDBList.stream()
+                .filter(oec -> !contraNovas.contains(oec.getContraindicacaoId().getContraindicacao()))
+                .toList();
+
+        for (OleoEssencialContraindicacao oec : contraParaRemover) {
+            oleoEssencialContraindicacaoRepository.delete(oec);
+        }
+
+        Set<String> contraDB = oleoEssencialContraindicacaoDBList.stream()
+                .map(oec -> oec.getContraindicacaoId().getContraindicacao())
+                .collect(Collectors.toSet());
+
+        for (String contra : contraNovas) {
+            if (!contraDB.contains(contra)) {
+                Contraindicacao contraindicacao = contraindicacaoRepository.findByContraindicacao(contra);
+                if (contraindicacao == null) {
+                    contraindicacao = new Contraindicacao();
+                    contraindicacao.setContraindicacao(contra);
+                    contraindicacao = contraindicacaoRepository.save(contraindicacao);
+                }
+                OleoEssencialContraindicacao novoVinculo = new OleoEssencialContraindicacao();
+                novoVinculo.setOleoEssencialId(oleoEssencial);
+                novoVinculo.setContraindicacaoId(contraindicacao);
+                oleoEssencialContraindicacaoRepository.save(novoVinculo);
+            }
+        }
+    }
 }

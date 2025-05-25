@@ -81,7 +81,7 @@ public class TelaPesquisa extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(14, 14, 14)
                 .addComponent(jLabel1)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -161,7 +161,7 @@ public class TelaPesquisa extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(voltarButton)
-                .addGap(262, 262, 262)
+                .addGap(330, 330, 330)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
@@ -176,12 +176,11 @@ public class TelaPesquisa extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(110, 110, 110)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(indicacaoOption)
-                        .addGap(111, 111, 111)))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(177, 177, 177)
+                        .addComponent(indicacaoOption)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 186, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -197,10 +196,11 @@ public class TelaPesquisa extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(voltarButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(oleoEssencialOption)
-                    .addComponent(indicacaoOption)
-                    .addComponent(contraindicacaoOption))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(oleoEssencialOption)
+                        .addComponent(contraindicacaoOption))
+                    .addComponent(indicacaoOption))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -214,7 +214,7 @@ public class TelaPesquisa extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(editarButton)
                     .addComponent(excluirButton))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(93, Short.MAX_VALUE))
         );
 
         pack();
@@ -250,9 +250,9 @@ public class TelaPesquisa extends javax.swing.JFrame {
         if(nomeBoolean&&oleoEssencialOption.isSelected() || indicacoesBoolean&&indicacaoOption.isSelected() || contraindicacoesBoolean&&contraindicacaoOption.isSelected()){
             JOptionPane.showMessageDialog(null,"Todos os campos selecionados devem ser preenchidos!");
         } else{
-            String oleos = oleoEssencialOption.isSelected() ? oleoEssencialTxt.getText() : "";
-            String indicacoes = indicacaoOption.isSelected() ? indicacaoTxt.getText() : "";
-            String contraindicacoes = contraindicacaoOption.isSelected() ? contraindicacaoTxt.getText() : "";
+            String oleos = oleoEssencialOption.isSelected() ? oleoEssencialTxt.getText() : null;
+            String indicacoes = indicacaoOption.isSelected() ? indicacaoTxt.getText() : null;
+            String contraindicacoes = contraindicacaoOption.isSelected() ? contraindicacaoTxt.getText() : null;
 
             List<TableView> tableViews = pesquisaService.tratarCampos(oleos, indicacoes, contraindicacoes);
             DefaultTableModel model = pesquisaService.criarModeloTabela(tableViews);
@@ -261,11 +261,41 @@ public class TelaPesquisa extends javax.swing.JFrame {
     }//GEN-LAST:event_voltarButton1ActionPerformed
 
     private void excluirButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarButton2ActionPerformed
-        // TODO add your handling code here:
+        String oleoEssencial = jTable1.getValueAt(jTable1.getSelectedRow(),0).toString();
+        String indicacao = jTable1.getValueAt(jTable1.getSelectedRow(),1).toString();
+        String contraindicacao = jTable1.getValueAt(jTable1.getSelectedRow(),2).toString();
+
+        pesquisaService.excluir(oleoEssencial);
+        DefaultTableModel model = pesquisaService.buscarTodos();
+        jTable1.setModel(model);
     }//GEN-LAST:event_voltarButton2ActionPerformed
 
     private void editarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarButton3ActionPerformed
-        // TODO add your handling code here:
+        int linhaSelecionada = jTable1.getSelectedRow();
+        if (linhaSelecionada == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione uma linha para editar.");
+            return;
+        }
+
+        // Obtém os valores atuais da linha selecionada
+        String oleo = jTable1.getValueAt(linhaSelecionada, 0).toString();
+        String indicacoes = jTable1.getValueAt(linhaSelecionada, 1).toString();
+        String contraindicacoes = jTable1.getValueAt(linhaSelecionada, 2).toString();
+
+        JanelaEditar janela = new JanelaEditar(this, oleo, indicacoes, contraindicacoes, tableView -> {
+            jTable1.setValueAt(oleo, linhaSelecionada, 0);
+            jTable1.setValueAt(indicacoes, linhaSelecionada, 1);
+            jTable1.setValueAt(contraindicacoes, linhaSelecionada, 2);
+
+            List<String> indicacoesList = Arrays.asList(tableView.getIndicacoes().trim().split("\\s*;\\s*"));
+            List<String> contraindicacoesList = Arrays.asList(tableView.getContraindicacoes().trim().split("\\s*;\\s*"));
+            pesquisaService.editar(tableView.getOleoEssencial(), indicacoesList, contraindicacoesList);
+            DefaultTableModel model = pesquisaService.buscarTodos();
+            jTable1.setModel(model);
+        });
+        janela.setVisible(true);
+
+
     }//GEN-LAST:event_voltarButton3ActionPerformed
 
     /**
