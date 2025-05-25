@@ -51,85 +51,75 @@ public class CadastroService {
         }
 
         try {
-
-            cadastrarOleo(oleoEssencial);
-            cadastrarIndicacoes(indicacoesList);
-            cadastrarContraindicacoes(contraindicacoesList);
-            cadastrarVinculos(oleoEssencial.getNome(), indicacoesList, contraindicacoesList);
-
+            validarItens(oleoEssencial, indicacoesList, contraindicacoesList);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erro ao cadastrar.");
         }
     }
 
-    public void cadastrarOleo(OleoEssencial oleoEssencial){
+    public void validarItens(OleoEssencial oleoEssencial, List<Indicacao> indicacoesList, List<Contraindicacao> contraindicacoesList) {
 
-        try {
-            oleoEssencialRepository.save(oleoEssencial);
+        boolean oleoExiste;
 
-        }catch(Exception e){
-            throw e;
-        }
-    }
+        try{
+            if(oleoEssencialRepository.findByNome(oleoEssencial.getNome()) == null){oleoEssencialRepository.save(oleoEssencial);}
 
-    public void cadastrarIndicacoes(List<Indicacao> indicacoesList) {
-
-        for (Indicacao value : indicacoesList) {
-            try {
-                indicacaoRepository.save(value);
-
-            } catch (Exception e) {
-                throw e;
+            for(Indicacao value : indicacoesList){
+                if(indicacaoRepository.findBySintoma(value.getSintoma()) == null) {indicacaoRepository.save(value);}
             }
-        }
-    }
 
-    public void cadastrarContraindicacoes(List<Contraindicacao> contraindicacoesList){
-
-        for (Contraindicacao contraindicacao : contraindicacoesList) {
-            try {
-                contraindicacaoRepository.save(contraindicacao);
-
-            } catch (Exception e) {
-                throw e;
+            for(Contraindicacao value : contraindicacoesList){
+                if(contraindicacaoRepository.findByContraindicacao(value.getContraindicacao()) == null) {contraindicacaoRepository.save(value);}
             }
+
+            cadastrarVinculos(oleoEssencial.getNome(), indicacoesList, contraindicacoesList);
+
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(null, "Erro ao cadastrar.");
         }
+
     }
 
     public void cadastrarVinculos(String nome, List<Indicacao> indicacoesList, List<Contraindicacao> contraindicacoesList){
 
         try {
-            OleoEssencial oleoId = oleoEssencialRepository.findByNome(nome);
+            OleoEssencial oleo = oleoEssencialRepository.findByNome(nome);
 
             for (int i = 0; i < indicacoesList.size(); i++){
 
-                Indicacao indicacao = indicacoesList.get(i);
+                Indicacao indicacaoSintoma = indicacoesList.get(i);
+                Indicacao indicacao = indicacaoRepository.findBySintoma(indicacaoSintoma.getSintoma());
 
-                Indicacao indicacaoId = indicacaoRepository.findBySintoma(indicacao.getSintoma());
+                OleoEssencialIndicacao entidadeIndicacao = oleoEssencialIndicacaoRepository.findMatchByIndicacaoId(oleo.getId(), indicacao.getId());
 
-                OleoEssencialIndicacao oleoEssencialIndicacao = new OleoEssencialIndicacao();
-                oleoEssencialIndicacao.setOleoEssencialId(oleoId);
-                oleoEssencialIndicacao.setIndicacaoId(indicacaoId);
+                if(entidadeIndicacao == null){
+                    OleoEssencialIndicacao oleoEssencialIndicacao = new OleoEssencialIndicacao();
+                    oleoEssencialIndicacao.setOleoEssencialId(oleo);
+                    oleoEssencialIndicacao.setIndicacaoId(indicacao);
 
-                oleoEssencialIndicacaoRepository.save(oleoEssencialIndicacao);
-
+                    oleoEssencialIndicacaoRepository.save(oleoEssencialIndicacao);
+                }
             }
 
 
             for (int i = 0; i < contraindicacoesList.size(); i++){
 
-                Contraindicacao contraindicacao = contraindicacoesList.get(i);
+                Contraindicacao contraindicacaoString = contraindicacoesList.get(i);
+                Contraindicacao contraindicacao = contraindicacaoRepository.findByContraindicacao(contraindicacaoString.getContraindicacao());
 
-                Contraindicacao contraindicacaoId = contraindicacaoRepository.findByContraindicacao(contraindicacao.getContraindicacao());
+                OleoEssencialContraindicacao entidadeContraindicacao = oleoEssencialContraindicacaoRepository.findMatchByContraindicacaoId(oleo.getId(), contraindicacao.getId());
 
-                OleoEssencialContraindicacao oleoEssencialContraindicacao = new OleoEssencialContraindicacao();
-                oleoEssencialContraindicacao.setOleoEssencialId(oleoId);
-                oleoEssencialContraindicacao.setContraindicacaoId(contraindicacaoId);
+                if(entidadeContraindicacao == null){
+                    OleoEssencialContraindicacao oleoEssencialContraindicacao = new OleoEssencialContraindicacao();
+                    oleoEssencialContraindicacao.setOleoEssencialId(oleo);
+                    oleoEssencialContraindicacao.setContraindicacaoId(contraindicacao);
 
-                oleoEssencialContraindicacaoRepository.save(oleoEssencialContraindicacao);
+                    oleoEssencialContraindicacaoRepository.save(oleoEssencialContraindicacao);
+                }
             }
 
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro ao cadastrar vínculos.");
             throw e;
         }
 
