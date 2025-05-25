@@ -4,7 +4,16 @@
  */
 package org.general.telas;
 
+import jakarta.annotation.PostConstruct;
+import org.general.model.TableView;
+import org.general.service.PesquisaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -12,6 +21,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TelaPesquisa extends javax.swing.JFrame {
+
+    @Autowired
+    PesquisaService pesquisaService;
 
     /**
      * Creates new form TelaPesquisa
@@ -36,11 +48,11 @@ public class TelaPesquisa extends javax.swing.JFrame {
         indicacaoOption = new javax.swing.JRadioButton();
         contraindicacaoOption = new javax.swing.JRadioButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
+        oleoEssencialTxt = new javax.swing.JTextPane();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextPane2 = new javax.swing.JTextPane();
+        indicacaoTxt = new javax.swing.JTextPane();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextPane3 = new javax.swing.JTextPane();
+        contraindicacaoTxt = new javax.swing.JTextPane();
         jScrollPane4 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         editarButton = new javax.swing.JButton();
@@ -100,23 +112,15 @@ public class TelaPesquisa extends javax.swing.JFrame {
             }
         });
 
-        jScrollPane1.setViewportView(jTextPane1);
+        oleoEssencialTxt.setEnabled(false);
+        jScrollPane1.setViewportView(oleoEssencialTxt);
 
-        jScrollPane2.setViewportView(jTextPane2);
+        indicacaoTxt.setEnabled(false);
+        jScrollPane2.setViewportView(indicacaoTxt);
 
-        jScrollPane3.setViewportView(jTextPane3);
+        contraindicacaoTxt.setEnabled(false);
+        jScrollPane3.setViewportView(contraindicacaoTxt);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
         jScrollPane4.setViewportView(jTable1);
 
         editarButton.setText("Editar");
@@ -127,7 +131,7 @@ public class TelaPesquisa extends javax.swing.JFrame {
         });
 
         excluirButton.setText("Excluir");
-        voltarButton.addActionListener(new java.awt.event.ActionListener() {
+        excluirButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 excluirButtonActionPerformed(evt);
             }
@@ -144,45 +148,46 @@ public class TelaPesquisa extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 364, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                            .addComponent(oleoEssencialOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE)
-                                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(indicacaoOption)
-                                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(contraindicacaoOption)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(21, 21, 21)
-                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 2, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(voltarButton)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap(16, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(54, 54, 54)
                 .addComponent(editarButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(excluirButton)
                 .addGap(53, 53, 53))
             .addGroup(layout.createSequentialGroup()
-                .addGap(154, 154, 154)
+                .addContainerGap()
+                .addComponent(jScrollPane4)
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(voltarButton)
+                .addGap(262, 262, 262)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(366, 366, 366)
                 .addComponent(pesquisarButton)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(58, 58, 58)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(oleoEssencialOption, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(110, 110, 110)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(indicacaoOption)
+                        .addGap(111, 111, 111)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(contraindicacaoOption)
+                        .addGap(44, 44, 44)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -191,7 +196,7 @@ public class TelaPesquisa extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(voltarButton))
-                .addGap(13, 13, 13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(oleoEssencialOption)
                     .addComponent(indicacaoOption)
@@ -201,38 +206,58 @@ public class TelaPesquisa extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(13, 13, 13)
                 .addComponent(pesquisarButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(editarButton)
                     .addComponent(excluirButton))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    @PostConstruct
+    public void init() {
+        jTable1.setModel(pesquisaService.buscarTodos());
+    }
 
     private void voltarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarButtonActionPerformed
         dispose();
     }//GEN-LAST:event_voltarButtonActionPerformed
 
     private void oleoEssencialOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oleoEssencialOptionActionPerformed
-        // TODO add your handling code here:
+        if (oleoEssencialOption.isSelected()){oleoEssencialTxt.setEnabled(true);}else{oleoEssencialTxt.setEnabled(false);}
     }//GEN-LAST:event_oleoEssencialOptionActionPerformed
 
     private void indicacaoOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_indicacaoOptionActionPerformed
-        // TODO add your handling code here:
+        if (indicacaoOption.isSelected()){indicacaoTxt.setEnabled(true);}else{indicacaoTxt.setEnabled(false);}
     }//GEN-LAST:event_indicacaoOptionActionPerformed
 
     private void contraindicacaoOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_contraindicacaoOptionActionPerformed
-        // TODO add your handling code here:
+        if (contraindicacaoOption.isSelected()){contraindicacaoTxt.setEnabled(true);}else{contraindicacaoTxt.setEnabled(false);}
     }//GEN-LAST:event_contraindicacaoOptionActionPerformed
 
     private void pesquisarButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarButton1ActionPerformed
-        // TODO add your handling code here:
+
+        Boolean nomeBoolean = oleoEssencialTxt.getText().isEmpty();
+        Boolean indicacoesBoolean = indicacaoTxt.getText().isEmpty();
+        Boolean contraindicacoesBoolean = contraindicacaoTxt.getText().isEmpty();
+
+        if(nomeBoolean&&oleoEssencialOption.isSelected() || indicacoesBoolean&&indicacaoOption.isSelected() || contraindicacoesBoolean&&contraindicacaoOption.isSelected()){
+            JOptionPane.showMessageDialog(null,"Todos os campos selecionados devem ser preenchidos!");
+        } else{
+            String oleos = oleoEssencialOption.isSelected() ? oleoEssencialTxt.getText() : "";
+            String indicacoes = indicacaoOption.isSelected() ? indicacaoTxt.getText() : "";
+            String contraindicacoes = contraindicacaoOption.isSelected() ? contraindicacaoTxt.getText() : "";
+
+            List<TableView> tableViews = pesquisaService.tratarCampos(oleos, indicacoes, contraindicacoes);
+            DefaultTableModel model = pesquisaService.criarModeloTabela(tableViews);
+            jTable1.setModel(model);
+        }
     }//GEN-LAST:event_voltarButton1ActionPerformed
 
     private void excluirButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_voltarButton2ActionPerformed
@@ -279,22 +304,22 @@ public class TelaPesquisa extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JRadioButton contraindicacaoOption;
+    private javax.swing.JTextPane contraindicacaoTxt;
+    private javax.swing.JButton editarButton;
+    private javax.swing.JButton excluirButton;
+    private javax.swing.JRadioButton indicacaoOption;
+    private javax.swing.JTextPane indicacaoTxt;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JRadioButton oleoEssencialOption;
-    private javax.swing.JRadioButton indicacaoOption;
-    private javax.swing.JRadioButton contraindicacaoOption;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextPane jTextPane1;
-    private javax.swing.JTextPane jTextPane2;
-    private javax.swing.JTextPane jTextPane3;
-    private javax.swing.JButton voltarButton;
+    private javax.swing.JRadioButton oleoEssencialOption;
+    private javax.swing.JTextPane oleoEssencialTxt;
     private javax.swing.JButton pesquisarButton;
-    private javax.swing.JButton excluirButton;
-    private javax.swing.JButton editarButton;
+    private javax.swing.JButton voltarButton;
     // End of variables declaration//GEN-END:variables
 }

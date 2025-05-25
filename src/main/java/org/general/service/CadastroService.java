@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,23 +125,6 @@ public class CadastroService {
     }
 
 
-    private DefaultTableModel criarModeloTabela(List<OleoEssencial> oleosEssenciais) {
-        // Define os nomes das colunas
-        String[] colunas = {"Oleo Essencial", "Indicações", "Contraindicações"};
 
-        // Cria o modelo de tabela com as colunas definidas
-        DefaultTableModel model = new DefaultTableModel(colunas, 0);
-
-        // Preenche o modelo com os dados dos podcasts
-        for (OleoEssencial oleoEssencial : oleosEssenciais) {
-            Object[] linha = {
-                    oleoEssencial.getId(),
-                    oleoEssencial.getNome()
-            };
-            model.addRow(linha);
-        }
-
-        return model;
-    }
 
 }
